@@ -1,1 +1,144 @@
-<p>product-form works!</p>
+<form (ngSubmit)="handleAction(frm)" autocomplete="off" #frm="ngForm" class="add-product-container">
+  <h3 class="mb-5 px-5">{{ title }}</h3>
+  
+  <div class="border-bottom pb-3 mb-3">
+    <div class="px-5">
+      <label for="name" class="form-label mb-2">Name</label>
+      <input
+        #name="ngModel"
+        type="text"
+        class="form-control"
+        id="name"
+        name="name"
+        placeholder="Product Name"
+        [(ngModel)]="product.name"
+        [ngClass]="{
+          'is-invalid': name.invalid && name.touched,
+          'is-valid': name.valid && name.touched
+        }"
+        required
+      />
+      <div *ngIf="name.invalid && name.touched" class="invalid-feedback">
+        Please add a valid product name.
+      </div>
+    </div>
+  </div>
+
+  <div class="border-bottom pb-3 mb-3 px-5">
+    <div class="px-5">
+      <label for="description" class="form-label mb-2">Description</label>
+      <input
+        #description="ngModel"
+        type="text"
+        class="form-control"
+        id="description"
+        name="description"
+        placeholder="Product Description"
+        [(ngModel)]="product.description"
+        [ngClass]="{
+          'is-invalid': description.invalid && description.touched,
+          'is-valid': description.valid && description.touched
+        }"
+        required
+      />
+      <div *ngIf="description.invalid && description.touched" class="invalid-feedback">
+        Please add a valid description.
+      </div>
+    </div>
+  </div>
+
+  <div class="border-bottom pb-3 mb-3 px-5">
+    <div class="px-5">
+      <label for="price" class="form-label mb-2">Price</label>
+      <input
+        #price="ngModel"
+        type="number"
+        class="form-control"
+        id="price"
+        name="price"
+        placeholder="Product Price"
+        [(ngModel)]="product.price"
+        [ngClass]="{
+          'is-invalid': price.invalid && price.touched,
+          'is-valid': price.valid && price.touched
+        }"
+        required
+      />
+      <div *ngIf="price.invalid && price.touched" class="invalid-feedback">
+        Please add a valid price.
+      </div>
+    </div>
+  </div>
+
+  <div class="border-bottom pb-3 mb-3 px-5">
+    <div class="px-5">
+      <label for="quantityInStock" class="form-label mb-2">Quantity in Stock</label>
+      <input
+        #quantityInStock="ngModel"
+        type="number"
+        class="form-control"
+        id="quantityInStock"
+        name="quantityInStock"
+        placeholder="Quantity in Stock"
+        [(ngModel)]="product.quantityInStock"
+        [ngClass]="{
+          'is-invalid': quantityInStock.invalid && quantityInStock.touched,
+          'is-valid': quantityInStock.valid && quantityInStock.touched
+        }"
+        required
+      />
+      <div *ngIf="quantityInStock.invalid && quantityInStock.touched" class="invalid-feedback">
+        Please add a valid quantity in stock.
+      </div>
+    </div>
+  </div>
+
+  <div class="border-bottom pb-3 mb-3 px-5">
+    <div class="px-5">
+      <label for="category" class="form-label mb-2">Category</label>
+      <select
+        #category="ngModel"
+        class="form-control"
+        id="category"
+        name="category"
+        [(ngModel)]="product.category"
+        [ngClass]="{
+          'is-invalid': category.invalid && category.touched,
+          'is-valid': category.valid && category.touched
+        }"
+        required
+      >
+        <option *ngFor="let cat of categoryList" [ngValue]="cat">{{ cat.name }}</option>
+      </select>
+      <div *ngIf="category.invalid && category.touched" class="invalid-feedback">
+        Please select a valid category.
+      </div>
+    </div>
+  </div>
+
+  <div class="pb-3 mb-3 d-flex justify-content-center align-items-center">
+    <button type="submit" class="btn btn-primary d-flex align-items-center">
+      <i
+        class="fa-solid white me-2"
+        [ngClass]="{
+          'fa-plus': action === 'add',
+          'fa-pencil': action === 'edit'
+        }"
+      ></i>
+      <p class="mb-0">{{ title }}</p>
+    </button>
+  </div>
+
+  <div class="d-flex justify-content-center align-items-center">
+    <p
+      class="pb-0"
+      *ngIf="feedbackMessage.message"
+      [ngClass]="{
+        'text-danger': feedbackMessage.type === 'ERROR',
+        'text-success': feedbackMessage.type === 'SUCCESS'
+      }"
+    >
+      {{ feedbackMessage.message }}
+    </p>
+  </div>
+</form>

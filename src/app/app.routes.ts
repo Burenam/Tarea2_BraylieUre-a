@@ -11,6 +11,8 @@ import { GuestGuard } from './guards/guest.guard';
 import { IRoleType } from './interfaces';
 import { ProfileComponent } from './pages/profile/profile.component';
 import { GamesComponent } from './pages/games/games.component';
+import { CategoriesComponent } from './pages/categories/categories.component';
+import { ProductsComponent } from './pages/products/products.component';
 
 export const routes: Routes = [
   {
@@ -48,7 +50,7 @@ export const routes: Routes = [
         canActivate:[AdminRoleGuard],
         data: { 
           authorities: [
-            IRoleType.admin, 
+            IRoleType.user, 
             IRoleType.superAdmin
           ],
           showInSidebar: true,
@@ -60,7 +62,6 @@ export const routes: Routes = [
         component: DashboardComponent,
         data: { 
           authorities: [
-            IRoleType.admin, 
             IRoleType.superAdmin,
             IRoleType.user
           ],
@@ -69,29 +70,39 @@ export const routes: Routes = [
         }
       },
       {
+        path: 'categories',
+        component: CategoriesComponent,
+        data: { 
+          authorities: [
+            IRoleType.superAdmin,
+            IRoleType.user
+          ],
+          showInSidebar: true,
+          name: 'Categories'
+        }
+      },
+      {
+        path: 'products',
+        component: ProductsComponent,
+        data: { 
+          authorities: [
+            IRoleType.superAdmin,
+            IRoleType.user
+          ],
+          showInSidebar: true,
+          name: 'Products'
+        }
+      },
+      {
         path: 'profile',
         component: ProfileComponent,
         data: { 
           authorities: [
-            IRoleType.admin, 
             IRoleType.superAdmin,
             IRoleType.user
           ],
           showInSidebar: false,
           name: 'profile'
-        }
-      },
-      {
-        path: 'games',
-        component: GamesComponent,
-        data: { 
-          authorities: [
-            IRoleType.admin, 
-            IRoleType.superAdmin,
-            IRoleType.user
-          ],
-          showInSidebar: true,
-          name: 'games'
         }
       }
     ],
