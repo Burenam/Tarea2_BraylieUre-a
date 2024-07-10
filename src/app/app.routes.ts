@@ -50,7 +50,6 @@ export const routes: Routes = [
         canActivate:[AdminRoleGuard],
         data: { 
           authorities: [
-            IRoleType.user, 
             IRoleType.superAdmin
           ],
           showInSidebar: true,
@@ -62,8 +61,6 @@ export const routes: Routes = [
         component: DashboardComponent,
         data: { 
           authorities: [
-            IRoleType.superAdmin,
-            IRoleType.user
           ],
           showInSidebar: true,
           name: 'Dashboard'

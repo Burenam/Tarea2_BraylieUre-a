@@ -1,4 +1,4 @@
-import { Component, Input, inject } from '@angular/core';
+import { Component, Input, OnChanges, SimpleChanges, inject } from '@angular/core';
 import { IGame } from '../../../interfaces';
 import { CommonModule } from '@angular/common';
 import { ModalComponent } from '../../modal/modal.component';
@@ -17,11 +17,18 @@ import { GameService } from '../../../services/game.service';
   templateUrl: './game-list.component.html',
   styleUrl: './game-list.component.scss'
 })
-export class GameListComponent {
+export class GameListComponent implements OnChanges{
   @Input() itemList: IGame[] = [];
+  @Input() areActionsAvailable: boolean = false;
   public selectedItem: IGame = {};
   public gameService: GameService = inject(GameService);
 
+  ngOnChanges(changes: SimpleChanges): void {
+    if(changes['areActionsAvailable']) {
+      console.log('areActionsAvailable', this.areActionsAvailable);
+    }
+  }
+  
   showDetailModal(item: IGame, modal: any) {
     this.selectedItem = {...item}
     modal.show();

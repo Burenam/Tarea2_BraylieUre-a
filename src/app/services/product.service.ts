@@ -1,63 +1,86 @@
-import { Injectable, signal } from '@angular/core';
+import { inject, Injectable, signal } from '@angular/core';
 import { BaseService } from './base-service';
 import { IProduct } from '../interfaces';
 import { Observable, catchError, tap, throwError } from 'rxjs';
+import { MatSnackBar } from '@angular/material/snack-bar';
 
 @Injectable({
   providedIn: 'root',
 })
 export class ProductService extends BaseService<IProduct> {
   protected override source: string = 'products';
-  private productListSignal = signal<IProduct[]>([]);
+  private itemListSignal = signal<IProduct[]>([]);
+  private snackBar: MatSnackBar = inject(MatSnackBar);
   
-  get products$() {
-    return this.productListSignal;
+  get items$() {
+    return this.itemListSignal;
   }
 
-  getAllSignal() {
+  public getAll() {
     this.findAll().subscribe({
       next: (response: any) => {
         response.reverse();
-        this.productListSignal.set(response);
+        this.itemListSignal.set(response);
       },
       error: (error: any) => {
-        console.error('Error fetching products', error);
+        console.error('Error in get all products request', error);
+        this.snackBar.open(error.error.description, 'Close' , {
+          horizontalPosition: 'right',
+          verticalPosition: 'top',
+          panelClass: ['error-snackbar']
+        });
       }
-    });
+    })
   }
-  saveProductSignal (product: IProduct): Observable<any>{
-    return this.add(product).pipe(
-      tap((response: any) => {
-        this.productListSignal.update( products => [response, ...products]);
-      }),
-      catchError(error => {
-        console.error('Error saving product', error);
-        return throwError(error);
-      })
-    );
+  
+  public save(item: IProduct) {
+    this.add(item).subscribe({
+      next: (response: any) => {
+        this.itemListSignal.update((products: IProduct[]) => [response, ...products]);
+      },
+      error: (error: any) => {
+        console.error('response', error.description);
+        this.snackBar.open(error.error.description, 'Close' , {
+          horizontalPosition: 'right',
+          verticalPosition: 'top',
+          panelClass: ['error-snackbar']
+        });
+      }
+    })
   }
-  updateProductSignal (product: IProduct): Observable<any>{
-    return this.edit(product.id, product).pipe(
-      tap((response: any) => {
-        const updatedProducts = this.productListSignal().map(u => u.id === product.id ? response : u);
-        this.productListSignal.set(updatedProducts);
-      }),
-      catchError(error => {
-        console.error('Error saving product', error);
-        return throwError(error);
-      })
-    );
+  
+  public update(item: IProduct) {
+    this.add(item).subscribe({
+      next: () => {
+        const updatedItems = this.itemListSignal().map(product => product.id === item.id ? item: product);
+        this.itemListSignal.set(updatedItems);
+      },
+      error: (error: any) => {
+        console.error('response', error.description);
+        this.snackBar.open(error.error.description, 'Close' , {
+          horizontalPosition: 'right',
+          verticalPosition: 'top',
+          panelClass: ['error-snackbar']
+        });
+      }
+    })
   }
-  deleteProductSignal (product: IProduct): Observable<any>{
-    return this.del(product.id).pipe(
-      tap((response: any) => {
-        const updatedProducts = this.productListSignal().filter(u => u.id !== product.id);
-        this.productListSignal.set(updatedProducts);
-      }),
-      catchError(error => {
-        console.error('Error saving product', error);
-        return throwError(error);
-      })
-    );
+
+
+  public delete(item: IProduct) {
+    this.del(item.id).subscribe({
+      next: () => {
+        this.itemListSignal.set(this.itemListSignal().filter(product => product.id != item.id));
+      },
+      error: (error: any) => {
+        console.error('response', error.description);
+        this.snackBar.open(error.error.description, 'Close' , {
+          horizontalPosition: 'right',
+          verticalPosition: 'top',
+          panelClass: ['error-snackbar']
+        });
+      }
+    })
   }
+
 }

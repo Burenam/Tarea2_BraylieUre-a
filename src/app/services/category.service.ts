@@ -1,7 +1,8 @@
-import { Injectable, signal } from '@angular/core';
+import { inject, Injectable, signal } from '@angular/core';
 import { BaseService } from './base-service';
 import { ICategory } from '../interfaces';
 import { Observable, catchError, tap, throwError } from 'rxjs';
+import { MatSnackBar } from '@angular/material/snack-bar';
 
 
 @Injectable({
@@ -9,72 +10,76 @@ import { Observable, catchError, tap, throwError } from 'rxjs';
 })
 export class CategoryService extends BaseService<ICategory> {
   protected override source: string = 'categories';
-  private categoryListSignal = signal<ICategory[]>([]);
+  private itemListSignal = signal<ICategory[]>([]);
+  private snackBar: MatSnackBar = inject(MatSnackBar);
   
-  get categories$() {
-    return this.categoryListSignal;
+  get items$() {
+    return this.itemListSignal;
   }
   
-  getAllSignal() {
+  public getAll() {
     this.findAll().subscribe({
       next: (response: any) => {
         response.reverse();
-        this.categoryListSignal.set(response);
+        this.itemListSignal.set(response);
       },
       error: (error: any) => {
-        console.error('Error fetching categories', error);
+        console.error('Error in get all categories request', error);
+        this.snackBar.open(error.error.description, 'Close' , {
+          horizontalPosition: 'right',
+          verticalPosition: 'top',
+          panelClass: ['error-snackbar']
+        });
       }
-    });
+    })
   }
 
-  getAllCategories(): Observable<ICategory[]> {
-    return this.findAll().pipe(
-      tap((response: any) => {
-        response.reverse();
-        this.categoryListSignal.set(response);
-      }),
-      catchError(error => {
-        console.error('Error fetching categories', error);
-        return throwError(error);
-      })
-    );
+  public save(item: ICategory) {
+    this.add(item).subscribe({
+      next: (response: any) => {
+        this.itemListSignal.update((categories: ICategory[]) => [response, ...categories]);
+      },
+      error: (error: any) => {
+        console.error('response', error.description);
+        this.snackBar.open(error.error.description, 'Close' , {
+          horizontalPosition: 'right',
+          verticalPosition: 'top',
+          panelClass: ['error-snackbar']
+        });
+      }
+    })
   }
   
-  saveCategorySignal (category: ICategory): Observable<any>{
-    return this.add(category).pipe(
-      tap((response: any) => {
-        this.categoryListSignal.update(categories => [response, ...categories]);
-      }),
-      catchError(error => {
-        console.error('Error saving category', error);
-        return throwError(error);
-      })
-    );
+  public update(item: ICategory) {
+    this.add(item).subscribe({
+      next: () => {
+        const updatedItems = this.itemListSignal().map(category => category.id === item.id ? item: category);
+        this.itemListSignal.set(updatedItems);
+      },
+      error: (error: any) => {
+        console.error('response', error.description);
+        this.snackBar.open(error.error.description, 'Close' , {
+          horizontalPosition: 'right',
+          verticalPosition: 'top',
+          panelClass: ['error-snackbar']
+        });
+      }
+    })
   }
-  
-  updateCategorySignal (category: ICategory): Observable<any>{
-    return this.edit(category.id, category).pipe(
-      tap((response: any) => {
-        const updatedCategories = this.categoryListSignal().map(c => c.id === category.id ? response : c);
-        this.categoryListSignal.set(updatedCategories);
-      }),
-      catchError(error => {
-        console.error('Error updating category', error);
-        return throwError(error);
-      })
-    );
-  }
-  
-  deleteCategorySignal (category: ICategory): Observable<any>{
-    return this.del(category.id).pipe(
-      tap((response: any) => {
-        const updatedCategories = this.categoryListSignal().filter(c => c.id !== category.id);
-        this.categoryListSignal.set(updatedCategories);
-      }),
-      catchError(error => {
-        console.error('Error deleting category', error);
-        return throwError(error);
-      })
-    );
+
+  public delete(item: ICategory) {
+    this.del(item.id).subscribe({
+      next: () => {
+        this.itemListSignal.set(this.itemListSignal().filter(category => category.id != item.id));
+      },
+      error: (error: any) => {
+        console.error('response', error.description);
+        this.snackBar.open(error.error.description, 'Close' , {
+          horizontalPosition: 'right',
+          verticalPosition: 'top',
+          panelClass: ['error-snackbar']
+        });
+      }
+    })
   }
 }

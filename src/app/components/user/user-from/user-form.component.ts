@@ -33,6 +33,8 @@ export class UserFormComponent {
       });
       return;
     } else {
+      // Set the role ID (1 for USER role) directly
+    this.user.role = { id: 1 };
       this.service[ this.action == 'add' ? 'saveUserSignal': 'updateUserSignal'](this.user).subscribe({
         next: () => {
           this.feedbackMessage.type = IFeedbackStatus.success;

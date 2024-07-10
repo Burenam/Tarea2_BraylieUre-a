@@ -1,13 +1,14 @@
-import { Component, effect, inject } from '@angular/core';
+import { Component, effect, inject, Input, OnChanges, SimpleChanges } from '@angular/core';
 import { ProductService } from '../../../services/product.service';
 import { CategoryService } from '../../../services/category.service';
 import { IProduct, ICategory } from '../../../interfaces';
-import { CommonModule } from '@angular/common';
+import { CommonModule, DatePipe } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ModalComponent } from '../../modal/modal.component';
 import { ProductFormComponent } from '../product-form/product-form.component';
 import { CategoryFormComponent } from '../../category/category-from/category-form.component';
 import {MatSnackBar, MatSnackBarModule} from '@angular/material/snack-bar';
+import { ActivatedRoute } from '@angular/router';
 
 
 @Component({
@@ -22,63 +23,37 @@ import {MatSnackBar, MatSnackBarModule} from '@angular/material/snack-bar';
     MatSnackBarModule
   ],
   templateUrl: './product-list.component.html',
-  styleUrl: './product-list.component.scss'
+  styleUrl: './product-list.component.scss',
+  providers: [DatePipe]
 })
-export class ProductListComponent {
-  public search: String = '';
-  public productList: IProduct[] = [];
-  public categoryList: ICategory[] = [];
-  private serviceP = inject(ProductService);
-  private serviceC = inject(CategoryService);
-  private snackBar = inject(MatSnackBar);
-  public currentProduct: IProduct = {
-    id: 0,
-    name: '',
-    description: '',
-    price: 0,
-    quantityInStock: 0,
-    category: {
-      id: 0,
-      name: '',
-      description: ''
-    }
-  };
+export class ProductListComponent implements OnChanges{
 
-  public currentCategory: ICategory = {
-    id: 0,
-    name: '',
-    description: ''
-  };
-  
-  constructor() {
-    this.serviceP.getAllSignal();
-    effect(() => {      
-      this.productList = this.serviceP.products$();
-    });
+  @Input() itemList: IProduct[] = [];
+  @Input() areActionsAvailable: boolean = true;
+  public selectedItem: IProduct = {};
+  public productService: ProductService = inject(ProductService);
+  constructor(private datePipe: DatePipe) { }
+
+  ngOnChanges(changes: SimpleChanges): void {
+    if (changes['areActionsAvailable']) {
+      console.log('areActionsAvailable', this.areActionsAvailable);
+    }
+    if (changes['itemList']) {
+      console.log('itemList', this.itemList);
+    }
   }
 
-  showDetail(product: IProduct, modal: any) {
-    this.currentProduct = {...product}; 
+  showDetailModal(item: IProduct, modal: any) {
+    this.selectedItem = {...item}
     modal.show();
   }
 
-  deleteProduct(product: IProduct) {
-    this.serviceP.deleteProductSignal(product).subscribe({
-      next: () => {
-        this.snackBar.open('Product deleted', 'Close', {
-          horizontalPosition: 'right',
-          verticalPosition: 'top',
-          duration: 5 * 1000,
-        });
-      },
-      error: (error: any) => {
-        this.snackBar.open('Error deleting Product', 'Close', {
-          horizontalPosition: 'right',
-          verticalPosition: 'top',
-          panelClass: ['error-snackbar']
-        });
-      }
-    })
+  handleFormAction(item: IProduct) {
+    this.productService.update(item);
+  }
+
+  deleteProduct(item: IProduct) {
+    this.productService.delete(item);
   }
 
 }
